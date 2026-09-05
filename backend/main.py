@@ -4,9 +4,17 @@ Provides authenticated, safe digital forensics endpoints for Image, Audio, Video
 """
 
 import os
+import sys
 import shutil
 import uuid
+from pathlib import Path
 from typing import Dict, Any, List
+
+# Ensure parent directory is in sys.path so 'backend.*' imports resolve in all deployment environments
+_parent_dir = str(Path(__file__).resolve().parent.parent)
+if _parent_dir not in sys.path:
+    sys.path.insert(0, _parent_dir)
+
 from pydantic import BaseModel, HttpUrl
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, status, Request
 from fastapi.middleware.cors import CORSMiddleware
