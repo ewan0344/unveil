@@ -1,9 +1,11 @@
 /**
  * UNVEIL API Service Layer
- * Uses import.meta.env.VITE_API_URL with default fallback to '/api'.
+ * Uses import.meta.env.VITE_API_URL with fallback to deployed Render backend:
+ * https://unveil-1-ff5a.onrender.com
  */
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '') + '/api';
+const RAW_BACKEND_URL = (import.meta.env.VITE_API_URL || 'https://unveil-1-ff5a.onrender.com').trim().replace(/\/$/, '');
+const API_BASE_URL = RAW_BACKEND_URL.endsWith('/api') ? RAW_BACKEND_URL : `${RAW_BACKEND_URL}/api`;
 
 export async function checkBackendHealth() {
   try {
