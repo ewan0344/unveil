@@ -55,48 +55,60 @@ def analyze_with_gemini_vision(image_path: str) -> Dict[str, Any]:
             "'overall_visual_assessment' (2-3 sentences explaining visual plausibility)."
         )
 
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
-        payload = {
-            "contents": [
-                {
-                    "parts": [
-                        {"text": prompt},
+        models_to_try = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.5-flash"]
+        last_error = None
+
+        for model_name in models_to_try:
+            try:
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
+                payload = {
+                    "contents": [
                         {
-                            "inline_data": {
-                                "mime_type": mime_type,
-                                "data": b64_data
-                            }
+                            "parts": [
+                                {"text": prompt},
+                                {
+                                    "inline_data": {
+                                        "mime_type": mime_type,
+                                        "data": b64_data
+                                    }
+                                }
+                            ]
                         }
-                    ]
+                    ],
+                    "generationConfig": {
+                        "temperature": 0.2,
+                        "response_mime_type": "application/json"
+                    }
                 }
-            ],
-            "generationConfig": {
-                "temperature": 0.2,
-                "response_mime_type": "application/json"
-            }
-        }
 
-        req = urllib.request.Request(
-            url,
-            data=json.dumps(payload).encode("utf-8"),
-            headers={"Content-Type": "application/json"},
-            method="POST"
-        )
+                req = urllib.request.Request(
+                    url,
+                    data=json.dumps(payload).encode("utf-8"),
+                    headers={"Content-Type": "application/json"},
+                    method="POST"
+                )
 
-        with urllib.request.urlopen(req, timeout=12) as response:
-            res_data = json.loads(response.read().decode("utf-8"))
-            candidate = res_data.get("candidates", [{}])[0]
-            part_text = candidate.get("content", {}).get("parts", [{}])[0].get("text", "{}")
-            parsed = json.loads(part_text)
-            
-            return {
-                "available": True,
-                "status": "Completed",
-                "summary": parsed.get("overall_visual_assessment", "Visual critique completed."),
-                "visual_inconsistencies": parsed.get("visual_inconsistencies", []),
-                "anatomical_integrity": parsed.get("anatomical_integrity", "Plausible"),
-                "lighting_physics": parsed.get("lighting_physics", "Consistent")
-            }
+                with urllib.request.urlopen(req, timeout=12) as response:
+                    res_data = json.loads(response.read().decode("utf-8"))
+                    candidate = res_data.get("candidates", [{}])[0]
+                    part_text = candidate.get("content", {}).get("parts", [{}])[0].get("text", "{}")
+                    parsed = json.loads(part_text)
+                    
+                    return {
+                        "available": True,
+                        "status": "Completed",
+                        "model": model_name,
+                        "summary": parsed.get("overall_visual_assessment", "Visual critique completed."),
+                        "visual_inconsistencies": parsed.get("visual_inconsistencies", []),
+                        "anatomical_integrity": parsed.get("anatomical_integrity", "Plausible"),
+                        "lighting_physics": parsed.get("lighting_physics", "Consistent")
+                    }
+            except Exception as err:
+                last_error = err
+                continue
+
+        if last_error:
+            raise last_error
 
     except Exception as e:
         return {

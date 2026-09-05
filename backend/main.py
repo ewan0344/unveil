@@ -91,14 +91,23 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         content={"success": False, "error": f"Validation error: {exc.errors()}"}
     )
 
+from starlette.exceptions import HTTPException as StarletteHTTPException
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"success": False, "error": str(exc.detail)}
+    )
+
 # Generic exception handler to protect internal stack traces
 @app.exception_handler(Exception)
 async def generic_exception_handler(request: Request, exc: Exception):
-    if isinstance(exc, HTTPException):
+    if isinstance(exc, HTTPException) or isinstance(exc, StarletteHTTPException):
         print(f"[HTTP {exc.status_code}] {exc.detail}")
         return JSONResponse(
             status_code=exc.status_code,
-            content={"success": False, "error": exc.detail}
+            content={"success": False, "error": str(exc.detail)}
         )
     print(f"[500 Error] {type(exc).__name__}: {exc}")
     return JSONResponse(
