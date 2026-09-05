@@ -1,0 +1,163 @@
+@import "tailwindcss";
+
+:root {
+  --bg-primary: #0a0b0e;
+  --bg-secondary: #121318;
+  --bg-surface: #181920;
+  --bg-elevated: #22242c;
+  --border-subtle: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.25);
+  
+  /* Reference Accent Palette */
+  --accent-orange: #FF5722;
+  --accent-orange-hover: #e64a19;
+  --accent-green: #2ED573;
+  --accent-green-hover: #26af5f;
+  --accent-blue: #82B1FF;
+  --accent-blue-hover: #70a1ff;
+  --accent-crimson: #731a1a;
+  
+  --text-primary: #f8f9fa;
+  --text-secondary: #b3b5c0;
+  --text-muted: #7e8294;
+  
+  --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Typography styles */
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Subtle Film Grain Noise Texture */
+.grain-overlay {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+/* Editorial pill badges matching reference */
+.pill-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+  padding: 0.45rem 1.35rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: transform 0.18s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.18s ease, filter 0.18s ease;
+  border: none;
+  text-decoration: none;
+}
+
+.pill-badge:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+}
+
+.pill-badge:active {
+  transform: translateY(1px);
+}
+
+.pill-orange {
+  background-color: var(--accent-orange);
+  color: #ffffff;
+}
+
+.pill-green {
+  background-color: var(--accent-green);
+  color: #0b1a0e;
+}
+
+.pill-blue {
+  background-color: var(--accent-blue);
+  color: #0b1424;
+}
+
+.pill-white {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+.pill-outline {
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+}
+
+.pill-outline:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  border-color: var(--border-strong);
+}
+
+/* Monumental Typography Hero */
+.monumental-title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  line-height: 0.88;
+  text-transform: uppercase;
+}
+
+/* Hairline borders & cards */
+.editorial-card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.75rem;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.editorial-card:hover {
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+/* Focus styles for strict accessibility */
+:focus-visible {
+  outline: 2px solid var(--accent-orange);
+  outline-offset: 3px;
+}
+
+/* Custom crisp scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2a2c38;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3e4254;
+}
