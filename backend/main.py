@@ -38,21 +38,44 @@ app = FastAPI(
 )
 
 # CORS configuration
+# Allows requests from local dev servers, any *.vercel.app domain, and configured environment origins
+_frontend_url = os.environ.get("FRONTEND_URL", "").strip()
+_allowed_origins_env = os.environ.get("ALLOWED_ORIGINS", "").strip()
+
 ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "*"
 ]
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+for _entry in (_frontend_url, _allowed_origins_env):
+    if _entry:
+        for _origin in _entry.split(","):
+            _cleaned = _origin.strip().rstrip("/")
+            if _cleaned and _cleaned not in ALLOWED_ORIGINS:
+                ALLOWED_ORIGINS.append(_cleaned)
+
+# If CORS_ALLOW_ALL is enabled (default) or wildcard in origins, allow all origins
+_has_wildcard = "*" in ALLOWED_ORIGINS or os.environ.get("CORS_ALLOW_ALL", "true").lower() in ("true", "1")
+
+if _has_wildcard:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=False,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+else:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=ALLOWED_ORIGINS,
+        allow_origin_regex=r"https://.*\.vercel\.app",
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 class UrlAnalysisRequest(BaseModel):
     url: str
@@ -246,13 +269,13 @@ async def get_sample_cases():
 
 @app.post("/api/analyze/sample/{sample_id}")
 async def handle_analyze_sample(sample_id: str):
-    """Executes forensic analysis directly against a pre-loaded benchmark sample."""
+    sample_dir = Path(__file__).resolve().parent / "sample_cases"
     sample_map = {
-        "sample-ai-portrait": ("image", "backend/sample_cases/ai_portrait.jpg", "ai_portrait.jpg"),
-        "sample-camera-photo": ("image", "backend/sample_cases/camera_photo.jpg", "camera_photo.jpg"),
-        "sample-synthetic-voice": ("audio", "backend/sample_cases/synthetic_voice.wav", "synthetic_voice.wav"),
-        "sample-acoustic-recording": ("audio", "backend/sample_cases/acoustic_recording.wav", "acoustic_recording.wav"),
-        "sample-synthetic-clip": ("video", "backend/sample_cases/synthetic_clip.mp4", "synthetic_clip.mp4"),
+        "sample-ai-portrait": ("image", str(sample_dir / "ai_portrait.jpg"), "ai_portrait.jpg"),
+        "sample-camera-photo": ("image", str(sample_dir / "camera_photo.jpg"), "camera_photo.jpg"),
+        "sample-synthetic-voice": ("audio", str(sample_dir / "synthetic_voice.wav"), "synthetic_voice.wav"),
+        "sample-acoustic-recording": ("audio", str(sample_dir / "acoustic_recording.wav"), "acoustic_recording.wav"),
+        "sample-synthetic-clip": ("video", str(sample_dir / "synthetic_clip.mp4"), "synthetic_clip.mp4"),
     }
 
     if sample_id not in sample_map:

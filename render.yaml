@@ -1,29 +1,18 @@
-﻿# Render Blueprint — UNVEIL Media Verification Platform
-# Defines two services: Python API backend + Vite static frontend
+# Render Blueprint — UNVEIL Media Verification Platform Backend
 services:
-  # ── Backend: Python / FastAPI / Uvicorn ──────────────────────────────────
   - type: web
     name: unveil-backend
     runtime: python
     rootDir: backend
     buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn index:app --host 0.0.0.0 --port $PORT
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
         value: "3.11"
       - key: PYTHONUNBUFFERED
         value: "1"
+      - key: FRONTEND_URL
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
     healthCheckPath: /api/health
-
-  # ── Frontend: Node / Vite static site ───────────────────────────────────
-  - type: web
-    name: unveil-frontend
-    runtime: node
-    rootDir: frontend
-    buildCommand: npm install && npx vite build
-    startCommand: npx vite preview --host 0.0.0.0 --port $PORT
-    envVars:
-      # Set this to your backend Render URL after first backend deploy, e.g.:
-      # https://unveil-backend.onrender.com
-      - key: VITE_API_URL
-        value: ""
